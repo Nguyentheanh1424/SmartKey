@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.10" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.10" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+    <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartKey.Application\SmartKey.Application.csproj" />
+    <ProjectReference Include="..\SmartKey.Domain\SmartKey.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

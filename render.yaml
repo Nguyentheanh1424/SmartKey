@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: smartkey-api
+    runtime: docker
+    dockerfilePath: SmartKey.API/Dockerfile
+    plan: free
+    autoDeploy: true

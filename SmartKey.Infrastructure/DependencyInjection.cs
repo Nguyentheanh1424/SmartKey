@@ -2,8 +2,10 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SmartKey.Application.Common.Interfaces.Auth;
 using SmartKey.Application.Common.Interfaces.Repositories;
 using SmartKey.Application.Common.Interfaces.Services;
+using SmartKey.Infrastructure.Auth;
 using SmartKey.Infrastructure.Persistence;
 using SmartKey.Infrastructure.Repositories;
 using SmartKey.Infrastructure.Services;
@@ -31,6 +33,10 @@ namespace SmartKey.Infrastructure
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFileStorageService, FileStorageService>();
             services.AddSingleton<IDateTimeService, DateTimeService>();
+            services.AddScoped<IOtpService, OtpService>();
+            services.AddHttpClient<IOAuthVerifier, OAuthVerifier>();
+            services.AddScoped<ITokenService, JwtTokenService>();
+            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             //Đăng ký Cache
             var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;

@@ -30,6 +30,7 @@ namespace SmartKey.Infrastructure.Services
 
             var ttl = absoluteTtl ?? slidingTtl ?? _absTtl;
 
+
             return _redis.StringSetAsync(cacheKey, json, ttl);
         }
 
@@ -39,6 +40,7 @@ namespace SmartKey.Infrastructure.Services
             if (!json.HasValue)
                 return default;
 
+            Console.WriteLine($"[CACHE-DEBUG] Raw JSON for key '{cacheKey}': {json}");
             var model = JsonSerializer.Deserialize<T>(json!)!;
             if (model == null)
                 return default;

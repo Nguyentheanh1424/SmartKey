@@ -3,7 +3,12 @@
     public class NotFoundException : Exception
     {
         public NotFoundException(string name, object key)
-            : base($"Entity \"{name}\" ({key}) was not found.")
+            : base($"Thực thể \"{name}\" ({key}) không tìm thấy.")
+        {
+        }
+
+        public NotFoundException(string message)
+            : base(message)
         {
         }
     }

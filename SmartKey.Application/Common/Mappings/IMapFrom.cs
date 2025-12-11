@@ -7,6 +7,8 @@ namespace SmartKey.Application.Common.Mappings
         void Mapping(Profile profile)
         {
             profile.CreateMap(typeof(TEntity), GetType());
+
+            profile.CreateMap(GetType(), typeof(TEntity));
         }
     }
 }

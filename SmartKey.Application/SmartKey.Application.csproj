@@ -17,10 +17,6 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Features\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SmartKey.Domain\SmartKey.Domain.csproj" />
   </ItemGroup>
 

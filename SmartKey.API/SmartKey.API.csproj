@@ -13,10 +13,6 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SmartKey.Application\SmartKey.Application.csproj" />
     <ProjectReference Include="..\SmartKey.Infrastructure\SmartKey.Infrastructure.csproj" />
   </ItemGroup>

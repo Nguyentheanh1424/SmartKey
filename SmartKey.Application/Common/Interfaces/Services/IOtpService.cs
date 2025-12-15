@@ -6,5 +6,6 @@
         Task ValidateOtpRequestAsync(string key);
         Task MarkOtpSentAsync(string key);
         Task<bool> VerifyAsync(string key, string otp);
+        Task ClearAttemptAsync(string key);
     }
 }

@@ -7,6 +7,7 @@ namespace SmartKey.Application.Common.Interfaces.Repositories
     {
         IQueryable<TEntity> GetAll();
         Task<List<TEntity>> GetAllAsync();
+        Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate);
         Task<TEntity?> GetByIdAsync(TId id);
         Task<List<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate);
         Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);

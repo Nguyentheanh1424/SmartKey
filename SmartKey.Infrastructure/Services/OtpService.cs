@@ -103,5 +103,11 @@ namespace SmartKey.Infrastructure.Services
 
             return true;
         }
+
+        public async Task ClearAttemptAsync(string key)
+        {
+            var attemptKey = BuildOtpAttemptCacheKey(key);
+            await _cache.RemoveAsync(attemptKey);
+        }
     }
 }

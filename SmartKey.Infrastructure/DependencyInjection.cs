@@ -37,6 +37,7 @@ namespace SmartKey.Infrastructure
             services.AddHttpClient<IOAuthVerifier, OAuthVerifier>();
             services.AddScoped<ITokenService, JwtTokenService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IAvatarGenerator, DiceBearAvatarGenerator>();
 
             //Đăng ký Cache
             var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;

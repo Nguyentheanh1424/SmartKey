@@ -21,6 +21,7 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
     {
         private readonly IConfiguration _configuration;
         private readonly IRepository<UserAuth, Guid> _authRepository;
+        private readonly IRepository<User, Guid> _userRepository;
         private readonly ICurrentUserService _currentUser;
         private readonly ITokenService _tokenService;
         private readonly IUnitOfWork _uow;
@@ -36,6 +37,7 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
             _tokenService = tokenService;
             _uow = uow;
             _authRepository = _uow.GetRepository<UserAuth, Guid>();
+            _userRepository = _uow.GetRepository<User, Guid>();
         }
 
         public async Task<Result<LoginResultDto>> Handle(
@@ -59,8 +61,12 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
             var providerEnum =
                 EnumExtensions.ParseEnum<AccountProvider>(auth.Provider);
 
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == auth.UserId)
+                ?? throw new NotFoundException(
+                    "Không xác định được người dùng.");
+
             var (newAccessToken, newRefreshToken) =
-                await _tokenService.IssueAsync(auth.UserId, providerEnum);
+                await _tokenService.IssueAsync(auth.UserId, providerEnum, user.Role);
 
             int refreshDays =
                 int.TryParse(_configuration["Jwt:RefreshTokenDays"], out int d)

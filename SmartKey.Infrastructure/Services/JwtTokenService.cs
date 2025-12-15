@@ -2,6 +2,7 @@
 using Microsoft.IdentityModel.Tokens;
 using SmartKey.Application.Common.Exceptions;
 using SmartKey.Application.Common.Interfaces.Services;
+using SmartKey.Domain.Common;
 using SmartKey.Domain.Enums;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -47,7 +48,7 @@ namespace SmartKey.Infrastructure.Services
             };
         }
 
-        public Task<(string accessToken, string refreshToken)> IssueAsync(Guid userId, AccountProvider provider)
+        public Task<(string accessToken, string refreshToken)> IssueAsync(Guid userId, AccountProvider provider, AccountRole role)
         {
             var issuer = _config["Jwt:Issuer"];
             var audience = _config["Jwt:Audience"];
@@ -61,7 +62,8 @@ namespace SmartKey.Infrastructure.Services
             var claims = new[]
             {
                 new Claim("userId", userId.ToString()),
-                new Claim("provider", provider.ToString()),
+                new Claim("provider", EnumExtensions.GetName(provider)),
+                new Claim(ClaimTypes.Role, EnumExtensions.GetName(role)),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 

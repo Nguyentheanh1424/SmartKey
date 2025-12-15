@@ -98,7 +98,7 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
             auth.MarkLoginSuccess();
 
             var (accessToken, refreshToken) =
-                await _tokenService.IssueAsync(user.Id, AccountProvider.Local);
+                await _tokenService.IssueAsync(user.Id, AccountProvider.Local, user.Role);
 
             int refreshDays =
                 int.TryParse(_configuration["Jwt:RefreshTokenDays"], out int d)
@@ -144,8 +144,12 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
                 ?? throw new NotFoundException(
                     "Chưa tạo tài khoản hoặc chưa liên kết phương thức đăng nhập.");
 
+            var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == auth.UserId)
+                ?? throw new NotFoundException(
+                    "Không xác định được người dùng.");
+
             var (accessToken, refreshToken) =
-                await _tokenService.IssueAsync(auth.UserId, provider);
+                await _tokenService.IssueAsync(auth.UserId, provider, user.Role);
 
             int refreshDays =
                 int.TryParse(_configuration["Jwt:RefreshTokenDays"], out int d)

@@ -103,6 +103,11 @@ namespace SmartKey.Domain.Entities
             return (locked, formatted);
         }
 
+        public void Lock()
+        {
+            Status = AuthStatus.Locked;
+        }
+
         public void Disable()
         {
             Status = AuthStatus.Disabled;

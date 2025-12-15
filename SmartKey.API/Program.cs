@@ -21,6 +21,8 @@ builder.Services.AddControllers()
     .AddJsonOptions(o =>
     {
         o.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+        o.JsonSerializerOptions.AllowTrailingCommas = true;
+        o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
     });
 
 // CORS
@@ -78,65 +80,66 @@ builder.Services.AddSignalR();
 var jwtConfig = builder.Configuration.GetSection("Jwt");
 var signingKey = jwtConfig["SigningKey"];
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
-
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.
+    AddAuthentication(options =>
     {
-        ValidateIssuer = true,
-        ValidIssuer = jwtConfig["Issuer"],
-
-        ValidateAudience = true,
-        ValidAudience = jwtConfig["Audience"],
-
-        ValidateIssuerSigningKey = true,
-
-        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromHexString(signingKey!)),
-
-        ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero,
-
-        NameClaimType = "userId"
-    };
-
-    // Support SignalR token via query string
-    options.Events = new JwtBearerEvents
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
     {
-        OnMessageReceived = context =>
+        options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
+
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            var accessToken = context.Request.Query["access_token"];
-            var path = context.HttpContext.Request.Path;
+            ValidateIssuer = true,
+            ValidIssuer = jwtConfig["Issuer"],
 
-            if (!string.IsNullOrEmpty(accessToken) &&
-                (path.StartsWithSegments("/hubs/board") ||
-                 path.StartsWithSegments("/hubs/workSpace") ||
-                 path.StartsWithSegments("/hubs/user")))
+            ValidateAudience = true,
+            ValidAudience = jwtConfig["Audience"],
+
+            ValidateIssuerSigningKey = true,
+
+            IssuerSigningKey = new SymmetricSecurityKey(Convert.FromHexString(signingKey!)),
+
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero,
+
+            NameClaimType = "userId"
+        };
+
+        // Support SignalR token via query string
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
             {
-                context.Token = accessToken;
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+
+                if (!string.IsNullOrEmpty(accessToken) &&
+                    (path.StartsWithSegments("/hubs/board") ||
+                     path.StartsWithSegments("/hubs/workSpace") ||
+                     path.StartsWithSegments("/hubs/user")))
+                {
+                    context.Token = accessToken;
+                }
+
+                return Task.CompletedTask;
+            },
+
+            OnChallenge = async context =>
+            {
+                context.HandleResponse();
+                context.Response.StatusCode = 401;
+                context.Response.ContentType = "application/json";
+
+                await context.Response.WriteAsJsonAsync(new
+                {
+                    message = "Token không hợp lệ hoặc đã hết hạn"
+                });
             }
-
-            return Task.CompletedTask;
-        },
-
-        OnChallenge = async context =>
-        {
-            context.HandleResponse();
-            context.Response.StatusCode = 401;
-            context.Response.ContentType = "application/json";
-
-            await context.Response.WriteAsJsonAsync(new
-            {
-                message = "Token không hợp lệ hoặc đã hết hạn"
-            });
-        }
-    };
-});
+        };
+    });
 
 builder.Services.AddAuthorization();
 

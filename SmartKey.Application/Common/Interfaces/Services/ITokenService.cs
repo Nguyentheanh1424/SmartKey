@@ -4,7 +4,7 @@ namespace SmartKey.Application.Common.Interfaces.Services
 {
     public interface ITokenService
     {
-        Task<(string accessToken, string refreshToken)> IssueAsync(Guid userId, AccountProvider provider);
+        Task<(string accessToken, string refreshToken)> IssueAsync(Guid userId, AccountProvider provider, AccountRole role);
         TokenInfoDto ParseAccessToken(string accessToken);
     }
 

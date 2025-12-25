@@ -2,9 +2,9 @@
 {
     public enum DoorPermission
     {
-        Owner,
-        Admin,
-        User,
-        TimeRestricted
+        Owner = 0,
+        Admin = 1,
+        User = 2,
+        TimeRestricted = 3,
     }
 }

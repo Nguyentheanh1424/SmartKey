@@ -27,5 +27,11 @@ namespace SmartKey.Domain.Entities
         {
             IsActive = false;
         }
+
+        public void SetValidity(DateTime? from, DateTime? to)
+        {
+            ValidFrom = from;
+            ValidTo = to;
+        }
     }
 }

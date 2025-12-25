@@ -1,4 +1,5 @@
 ﻿using SmartKey.Domain.Common;
+using SmartKey.Domain.Enums;
 
 namespace SmartKey.Domain.Entities
 {
@@ -9,11 +10,14 @@ namespace SmartKey.Domain.Entities
         public string DoorCode { get; private set; } = string.Empty;
         public string Name { get; private set; } = string.Empty;
 
+        public DoorState State { get; private set; } = DoorState.Unknown;
+
         public string MqttTopicPrefix { get; private set; } = string.Empty;
         public string MacAddress { get; private set; } = string.Empty;
 
         public int Battery { get; private set; }
         public DateTime LastSyncAt { get; private set; }
+        public DateTime? LastSyncRequestedAt { get; private set; }
 
         protected Door() { }
 
@@ -34,6 +38,17 @@ namespace SmartKey.Domain.Entities
         public void UpdateBattery(int battery)
         {
             Battery = battery;
+            LastSyncAt = DateTime.UtcNow;
+        }
+
+        public void MarkSyncRequested()
+        {
+            LastSyncRequestedAt = DateTime.UtcNow;
+        }
+
+        public void UpdateState(DoorState state)
+        {
+            State = state;
             LastSyncAt = DateTime.UtcNow;
         }
     }

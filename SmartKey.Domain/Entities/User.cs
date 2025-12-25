@@ -15,9 +15,6 @@ namespace SmartKey.Domain.Entities
         public DateTime? DateOfBirth { get; private set; }
         public DateTime? NameUpdatedAt { get; private set; }
 
-        public IReadOnlyCollection<Guid> OwnedDoorIds => _ownedDoorIds;
-        private readonly List<Guid> _ownedDoorIds = new();
-
         protected User() { }
 
         public User(string name, string email, string avatarUrl)
@@ -62,12 +59,6 @@ namespace SmartKey.Domain.Entities
         public void UpdateDateOfBirth(DateTime dateOfBirth)
         {
             DateOfBirth = dateOfBirth.Date;
-        }
-
-        public void AddOwnedDoor(Guid doorId)
-        {
-            if (!_ownedDoorIds.Contains(doorId))
-                _ownedDoorIds.Add(doorId);
         }
 
         public void SetRole(AccountRole role)

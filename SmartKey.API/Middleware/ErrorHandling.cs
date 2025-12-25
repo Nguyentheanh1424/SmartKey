@@ -1,4 +1,5 @@
 ﻿using SmartKey.Application.Common.Exceptions;
+using SmartKey.Domain.Common;
 
 namespace SmartKey.API.Middleware
 {
@@ -47,11 +48,26 @@ namespace SmartKey.API.Middleware
                 // 414 Lỗi nghiệp vụ
                 await HandleBusinessExceptionAsync(context, ex);
             }
+            catch (DomainException ex)
+            {
+                await HandleDomainExceptionAsync(context, ex);
+            }
             catch (Exception ex)
             {
                 // 500 Lỗi hệ thống
                 await HandleInternalExceptionAsync(context, ex);
             }
+        }
+
+        private async Task HandleDomainExceptionAsync(HttpContext context, DomainException ex)
+        {
+            context.Response.StatusCode = 415;
+            context.Response.ContentType = "application/json";
+
+            await context.Response.WriteAsJsonAsync(new
+            {
+                message = ex.Message
+            });
         }
 
         private async Task HandleBusinessExceptionAsync(HttpContext context, BusinessException ex)

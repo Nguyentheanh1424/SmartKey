@@ -79,46 +79,5 @@ namespace SmartKey.API.Controllers
             var result = await _mediator.Send(command);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
-
-        [HttpGet]
-        [Authorize(Roles = "Admin")]
-        [SwaggerOperation(
-            Summary = "(Admin) Danh sách tất cả user",
-            Description = "Admin xem danh sách toàn bộ user trong hệ thống."
-        )]
-        public async Task<IActionResult> GetAllUsersForAdmin()
-        {
-            var result = await _mediator.Send(new GetAllUsersForAdminQuery());
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
-        }
-
-        [HttpGet("{userId:guid}")]
-        [Authorize(Roles = "Admin")]
-        [SwaggerOperation(
-            Summary = "(Admin) Xem user khác",
-            Description = "Admin xem thông tin profile của user bất kỳ."
-        )]
-        public async Task<IActionResult> GetUserById(Guid userId)
-        {
-            var result = await _mediator.Send(new GetUserByIdQuery(userId));
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
-        }
-
-        [HttpPut("{userId:guid}/auth-status")]
-        [Authorize(Roles = "Admin")]
-        [SwaggerOperation(
-            Summary = "(Admin) Cập nhật trạng thái user",
-            Description = "Admin thay đổi trạng thái xác thực của user (Active, Locked, Disabled, Banned, Deleted)."
-        )]
-        public async Task<IActionResult> UpdateUserAuthStatus(
-            Guid userId,
-            [FromBody] AuthStatus status)
-        {
-            var result = await _mediator.Send(
-                new UpdateUserAuthStatusCommand(userId, status));
-
-            return result.IsSuccess ? Ok(result) : BadRequest(result);
-        }
-
     }
 }

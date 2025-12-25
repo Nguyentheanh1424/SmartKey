@@ -20,4 +20,8 @@
     <ProjectReference Include="..\SmartKey.Domain\SmartKey.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Features\DoorRecordFeatures\Commands\" />
+  </ItemGroup>
+
 </Project>

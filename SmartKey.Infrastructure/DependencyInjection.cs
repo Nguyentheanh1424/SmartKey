@@ -2,10 +2,14 @@
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using MQTTnet;
 using SmartKey.Application.Common.Interfaces.Auth;
+using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
 using SmartKey.Application.Common.Interfaces.Services;
+using SmartKey.Application.Features.MQTTFeatures;
 using SmartKey.Infrastructure.Auth;
+using SmartKey.Infrastructure.MQTT;
 using SmartKey.Infrastructure.Persistence;
 using SmartKey.Infrastructure.Repositories;
 using SmartKey.Infrastructure.Services;
@@ -77,6 +81,31 @@ namespace SmartKey.Infrastructure
                         sp.GetRequiredService<IConfiguration>()
                     ));
             }
+
+            // Đăng ký MQTT
+            services.Configure<MqttOptions>(
+                configuration.GetSection("Mqtt"));
+
+            services.AddSingleton<IMqttClient>(_ =>
+            {
+                return new MqttClientFactory().CreateMqttClient();
+            });
+
+
+            services.AddSingleton<IMqttClientOptionsFactory, MqttClientOptionsFactory>();
+            services.AddHostedService<MqttHostedService>();
+
+            services.AddSingleton<IMqttPublisher, MqttPublisher>();
+            services.AddSingleton<IDoorMqttService, DoorMqttService>();
+            services.AddSingleton<IMqttMessageDispatcher, MqttMessageDispatcher>();
+
+            services.AddScoped<DoorStateMessageHandler>();
+            services.AddScoped<DoorBatteryMessageHandler>();
+            services.AddScoped<DoorLogMessageHandler>();
+
+            services.AddScoped<DoorPasscodesListHandler>();
+            services.AddScoped<DoorICCardsListHandler>();
+
 
             return services;
         }

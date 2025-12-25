@@ -53,7 +53,7 @@ namespace SmartKey.Infrastructure.Services
             var issuer = _config["Jwt:Issuer"];
             var audience = _config["Jwt:Audience"];
             var signingKey = _config["Jwt:SigningKey"];
-            var accessMinutes = int.TryParse(_config["Jwt:AccessTokenMinutes"], out int value) ? value : 30;
+            var accessMinutes = int.TryParse(_config["Jwt:AccessTokenMinutes"], out int value) ? value : 36;
 
             var keyBytes = Convert.FromHexString(signingKey!);
             var key = new SymmetricSecurityKey(keyBytes);

@@ -29,10 +29,17 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
             CancellationToken ct)
         {
             var doorRepo = _uow.GetRepository<Door, Guid>();
+            var passcodeRepo = _uow.GetRepository<Passcode, Guid>();
             var door = await doorRepo.GetByIdAsync(request.DoorId);
 
             if (door == null)
                 throw new Exception("Door not found");
+
+            var passcodes = await passcodeRepo.FindAsync(
+                p => p.DoorId == request.DoorId);
+
+            if (!passcodes.Any(p => p.Code == request.Code))
+                throw new Exception("Passcode not found");
 
             await _mqtt.PublishPasscodesCommandAsync(
                 door.MqttTopicPrefix,

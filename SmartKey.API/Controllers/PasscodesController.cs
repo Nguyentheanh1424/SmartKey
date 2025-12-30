@@ -63,7 +63,8 @@ namespace SmartKey.API.Controllers
         {
             var command = new UpdatePasscodeCommand(
                 DoorId: doorId,
-                Code: body.Code,
+                OldCode: body.Code,
+                NewCode: body.Code,
                 Type: body.Type,
                 ValidFrom: body.ValidFrom,
                 ValidTo: body.ValidTo

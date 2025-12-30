@@ -8,7 +8,8 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
 {
     public record UpdatePasscodeCommand(
         Guid DoorId,
-        string Code,
+        string OldCode,
+        string NewCode,
         PasscodeType Type,
         DateTime? ValidFrom,
         DateTime? ValidTo
@@ -33,10 +34,17 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
             CancellationToken ct)
         {
             var doorRepo = _uow.GetRepository<Door, Guid>();
+            var passcodeRepo = _uow.GetRepository<Passcode, Guid>();
             var door = await doorRepo.GetByIdAsync(request.DoorId);
 
             if (door == null)
                 throw new Exception("Door not found");
+
+            var passcodes = await passcodeRepo.FindAsync(
+                p => p.DoorId == request.DoorId);
+
+            if (!passcodes.Any(p => p.Code == request.OldCode))
+                throw new Exception("Old passcode not found");
 
             // Remove old
             await _mqtt.PublishPasscodesCommandAsync(
@@ -44,7 +52,7 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
                 new
                 {
                     action = "remove",
-                    code = request.Code
+                    code = request.OldCode,
                 },
                 ct
             );
@@ -55,7 +63,7 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
                 new
                 {
                     action = "add",
-                    code = request.Code,
+                    code = request.NewCode,
                     type = request.Type switch
                     {
                         PasscodeType.OneTime => "one_time",

@@ -2,6 +2,16 @@
 {
     public interface IFileStorageService
     {
-        Task<string> UploadAsync(Stream fileStream, string fileName);
+        Task<string> UploadAsync(
+            Stream fileStream,
+            string fileName,
+            string? contentType = null,
+            CancellationToken cancellationToken = default
+        );
+
+        Task DeleteAsync(
+            string filePath,
+            CancellationToken cancellationToken = default
+        );
     }
 }

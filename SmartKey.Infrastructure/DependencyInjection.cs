@@ -14,6 +14,7 @@ using SmartKey.Infrastructure.Persistence;
 using SmartKey.Infrastructure.Repositories;
 using SmartKey.Infrastructure.Services;
 using StackExchange.Redis;
+using Supabase;
 
 namespace SmartKey.Infrastructure
 {
@@ -42,6 +43,29 @@ namespace SmartKey.Infrastructure
             services.AddScoped<ITokenService, JwtTokenService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IAvatarGenerator, DiceBearAvatarGenerator>();
+
+            // Đăng ký Server Storage
+            var supabaseOptions = new SupabaseStorageOptions();
+            configuration.GetSection("Supabase").Bind(supabaseOptions);
+
+            services.AddSingleton(supabaseOptions);
+
+            services.AddSingleton(provider =>
+            {
+                var options = provider.GetRequiredService<SupabaseStorageOptions>();
+
+                var client = new Client(
+                    options.Url,
+                    options.ServiceRoleKey,
+                    new SupabaseOptions
+                    {
+                        AutoConnectRealtime = false,
+                        AutoRefreshToken = false
+                    }
+                );
+
+                return client;
+            });
 
             //Đăng ký Cache
             var useRedis = bool.TryParse(configuration["Cache:UseRedis"], out var val) && val;

@@ -105,7 +105,7 @@ namespace SmartKey.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("LinkOAuth")]
+        [HttpPost("link-oauth")]
         [Authorize]
         [SwaggerOperation(
             Summary = "Liên kết đăng nhập mạng xã hội",
@@ -117,7 +117,7 @@ namespace SmartKey.API.Controllers
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
 
-        [HttpPost("UnlinkOAuth")]
+        [HttpPost("unlink-oauth")]
         [Authorize]
         [SwaggerOperation(
             Summary = "Hủy liên kết đăng nhập mạng xã hội",

@@ -19,7 +19,17 @@ namespace SmartKey.Infrastructure.Services
 
         public async Task<OAuthProfileDto> VerifyGoogleAsync(string token)
         {
-            var payload = await GoogleJsonWebSignature.ValidateAsync(token);
+            // Hardcode client ID
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[]
+                {
+                    "509252528902-9m50ml26rorl4ne179mcekn8vt6jvcus.apps.googleusercontent.com"
+                }
+
+            };
+
+            var payload = await GoogleJsonWebSignature.ValidateAsync(token, settings);
 
             if (!payload.EmailVerified)
                 throw new UnauthorizedException("Google email chưa được xác minh.");

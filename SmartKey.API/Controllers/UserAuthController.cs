@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SmartKey.Application.Features.Authentication.Commands;
 using SmartKey.Application.Features.UserAuthFeatures.Commands;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -99,6 +100,30 @@ namespace SmartKey.API.Controllers
         [HttpPost("forgot-password/verify")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPasswordVerify([FromBody] ForgotPasswordVerifyCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("LinkOAuth")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Liên kết đăng nhập mạng xã hội",
+            Description = "Liên kết Google hoặc Facebook với tài khoản hiện tại."
+        )]
+        public async Task<IActionResult> LinkOAuth([FromBody] LinkOAuthCommand command)
+        {
+            var result = await _mediator.Send(command);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
+        [HttpPost("UnlinkOAuth")]
+        [Authorize]
+        [SwaggerOperation(
+            Summary = "Hủy liên kết đăng nhập mạng xã hội",
+            Description = "Hủy liên kết Google hoặc Facebook khỏi tài khoản hiện tại."
+        )]
+        public async Task<IActionResult> UnlinkOAuth([FromBody] UnlinkOAuthCommand command)
         {
             var result = await _mediator.Send(command);
             return result.IsSuccess ? Ok(result) : BadRequest(result);

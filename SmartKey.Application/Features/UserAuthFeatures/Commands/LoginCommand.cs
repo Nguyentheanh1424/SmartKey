@@ -61,6 +61,12 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
             LoginCommand request,
             CancellationToken cancellationToken)
         {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                throw new AppException("Email không được để trống.");
+
+            if (string.IsNullOrWhiteSpace(request.Password))
+                throw new AppException("Mật khẩu không được để trống.");
+
             var email = request.Email!.Trim().ToLower();
 
             var user = await _userRepository.FirstOrDefaultAsync(u => u.Email == email)
@@ -69,7 +75,7 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
             var auth = await _authRepository.FirstOrDefaultAsync(a =>
                 a.UserId == user.Id &&
                 a.Provider == EnumExtensions.GetName(AccountProvider.Local))
-                ?? throw new AppException("Tài khoản chưa thiết lập đăng nhập Local.");
+                ?? throw new AppException("Tài khoản chưa thiết lập phương thức đăng nhập này.");
 
             var (isUsable, message) = auth.IsActive();
             if (!isUsable)
@@ -147,6 +153,14 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
             var user = await _userRepository.FirstOrDefaultAsync(x => x.Id == auth.UserId)
                 ?? throw new NotFoundException(
                     "Không xác định được người dùng.");
+
+            var (isUsable, message) = auth.IsActive();
+            if (!isUsable)
+                throw new ForbiddenAccessException(message);
+
+            var (isLocked, remaining) = auth.IsLocked();
+            if (isLocked)
+                throw new ForbiddenAccessException($"Tài khoản bị khóa trong {remaining} phút.");
 
             var (accessToken, refreshToken) =
                 await _tokenService.IssueAsync(auth.UserId, provider, user.Role);

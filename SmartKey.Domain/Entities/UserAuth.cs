@@ -37,12 +37,11 @@ namespace SmartKey.Domain.Entities
             };
         }
 
-        public static UserAuth CreateOAuth(User user, string provider, string providerUid)
+        public static UserAuth CreateOAuth(Guid userId, string provider, string providerUid)
         {
             return new UserAuth
             {
-                User = user,
-                UserId = user.Id,
+                UserId = userId,
                 Provider = provider,
                 ProviderUid = providerUid,
             };

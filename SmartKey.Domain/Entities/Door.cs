@@ -21,11 +21,13 @@ namespace SmartKey.Domain.Entities
 
         protected Door() { }
 
-        public Door(Guid ownerId, string doorCode, string name, string mqttPrefix)
+        public Door(Guid ownerId, string doorCode, string name, string macAddress, string mqttPrefix)
         {
             OwnerId = ownerId;
             DoorCode = doorCode;
             Name = name;
+
+            MacAddress = macAddress;
             MqttTopicPrefix = mqttPrefix;
             LastSyncAt = DateTime.UtcNow;
         }

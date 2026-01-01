@@ -10,6 +10,7 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
     public record CreateDoorCommand(
         string DoorCode,
         string Name,
+        string MacAddress,
         string MqttTopicPrefix
     ) : IRequest<Result<Guid>>;
 
@@ -46,6 +47,7 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
                 ownerId,
                 request.DoorCode,
                 request.Name,
+                request.MacAddress,
                 request.MqttTopicPrefix
             );
 

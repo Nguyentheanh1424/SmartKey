@@ -59,11 +59,11 @@ namespace SmartKey.Application.Features.DoorCommandFeatures.Commands
                 return Result.Success("Door đã ở trạng thái mở.");
             }
 
+            await doorCmdRepo.AddAsync(new DoorCommand(request.DoorId, "unlock", "Mở khóa cửa từ xa"));
+
             await _doorMqttService.UnlockAsync(
                 door.MqttTopicPrefix,
                 cancellationToken);
-
-            // 6️⃣ KHÔNG update state ở đây
 
             return Result.Success("Đã gửi lệnh mở cửa.");
         }

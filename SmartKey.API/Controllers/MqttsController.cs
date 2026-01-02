@@ -46,5 +46,7 @@ namespace SmartKey.API.Controllers
         )]
         public async Task<IActionResult> Stats()
             => Ok(await _mediator.Send(new GetMqttStatsQuery()));
+
+
     }
 }

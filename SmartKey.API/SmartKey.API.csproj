@@ -15,6 +15,11 @@
   <ItemGroup>
     <ProjectReference Include="..\SmartKey.Application\SmartKey.Application.csproj" />
     <ProjectReference Include="..\SmartKey.Infrastructure\SmartKey.Infrastructure.csproj" />
+    <ProjectReference Include="..\SmartKey.Presentation.SignalR\SmartKey.Presentation.SignalR.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

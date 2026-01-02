@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36603.0 d17.14
+# Visual Studio Version 18
+VisualStudioVersion = 18.1.11312.151 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartKey.API", "SmartKey.API\SmartKey.API.csproj", "{5DD39BBE-1FA7-4341-9B69-FF91BAF2B698}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartKey.Domain", "SmartKey.Domain\SmartKey.Domain.csproj", "{B625C37C-C889-474B-876E-61E24FC4C7CD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartKey.Infrastructure", "SmartKey.Infrastructure\SmartKey.Infrastructure.csproj", "{F5D2B3FD-E1A0-4A4A-8198-60818FCD16EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartKey.Presentation.SignalR", "SmartKey.Presentation.SignalR\SmartKey.Presentation.SignalR.csproj", "{8EA5AA4D-B09D-4688-ACBF-A3CBDB3DE573}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{F5D2B3FD-E1A0-4A4A-8198-60818FCD16EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5D2B3FD-E1A0-4A4A-8198-60818FCD16EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5D2B3FD-E1A0-4A4A-8198-60818FCD16EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8EA5AA4D-B09D-4688-ACBF-A3CBDB3DE573}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8EA5AA4D-B09D-4688-ACBF-A3CBDB3DE573}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8EA5AA4D-B09D-4688-ACBF-A3CBDB3DE573}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8EA5AA4D-B09D-4688-ACBF-A3CBDB3DE573}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

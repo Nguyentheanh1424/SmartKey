@@ -37,6 +37,7 @@ namespace SmartKey.Application.Features.DoorCommandFeatures.Commands
                 ?? throw new UnauthorizedException();
 
             var doorRepo = _unitOfWork.GetRepository<Door, Guid>();
+            var doorCmdRepo = _unitOfWork.GetRepository<DoorCommand, Guid>();
             var shareRepo = _unitOfWork.GetRepository<DoorShare, Guid>();
 
             var door = await doorRepo.GetByIdAsync(request.DoorId)
@@ -58,6 +59,8 @@ namespace SmartKey.Application.Features.DoorCommandFeatures.Commands
                 cancellationToken);
 
             door.MarkSyncRequested();
+
+            await doorCmdRepo.AddAsync(new DoorCommand(request.DoorId, "sync", "Đồng bộ trạng thái"));
 
             await _unitOfWork.SaveChangesAsync(cancellationToken);
 

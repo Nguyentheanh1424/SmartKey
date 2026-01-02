@@ -1,18 +1,32 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
 using SmartKey.Application.Features.MQTTFeatures;
 using SmartKey.Domain.Entities;
+using System.Text.Json;
 
 namespace SmartKey.Infrastructure.MQTT
 {
     public class MqttMessageDispatcher : IMqttMessageDispatcher
     {
         private readonly IServiceScopeFactory _scopeFactory;
+        private readonly ILogger<MqttMessageDispatcher> _logger;
 
-        public MqttMessageDispatcher(IServiceScopeFactory scopeFactory)
+        private static string PrettyJson(string? json)
+        {
+            if (json == null) return "";
+            using var doc = JsonDocument.Parse(json);
+            return JsonSerializer.Serialize(doc, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+        }
+
+        public MqttMessageDispatcher(IServiceScopeFactory scopeFactory, ILogger<MqttMessageDispatcher> logger)
         {
             _scopeFactory = scopeFactory;
+            _logger = logger;
         }
 
         private IMqttMessageHandler? ResolveHandler(
@@ -45,6 +59,12 @@ namespace SmartKey.Infrastructure.MQTT
             string payload,
             CancellationToken ct)
         {
+            _logger.LogInformation(
+                "MQTT message received.Topic: {Topic} Payload: {Payload}",
+                topic,
+                PrettyJson(payload));
+
+
             using var scope = _scopeFactory.CreateScope();
             var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
 
@@ -59,10 +79,11 @@ namespace SmartKey.Infrastructure.MQTT
                 return;
 
             var parts = topic.Split('/');
-            if (parts.Length < 3) return;
+            if (parts.Length != 2)
+                return;
 
-            var mqttPrefix = $"{parts[0]}/{parts[1]}";
-            var suffix = parts[2];
+            var mqttPrefix = parts[0];
+            var suffix = parts[1];
 
             var doorRepo = uow.GetRepository<Door, Guid>();
             var door = await doorRepo.FirstOrDefaultAsync(

@@ -3,6 +3,7 @@
     public enum PasscodeType
     {
         OneTime,
-        Timed
+        Timed,
+        Master
     }
 }

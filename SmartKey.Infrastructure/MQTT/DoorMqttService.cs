@@ -34,7 +34,7 @@ namespace SmartKey.Infrastructure.MQTT
                 topic: $"{topicPrefix}/control",
                 payload: payload,
                 qos: QoS,
-                retain: true,
+                retain: false,
                 ct: ct);
         }
 

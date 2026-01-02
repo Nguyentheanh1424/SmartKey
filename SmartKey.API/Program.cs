@@ -1,9 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SmartKey.API.Middleware;
+using SmartKey.API.SignalR;
 using SmartKey.Application;
+using SmartKey.Application.Common.Interfaces.Services;
 using SmartKey.Infrastructure;
+using SmartKey.Infrastructure.Services;
+using SmartKey.Presentation.SignalR.Hubs;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +20,7 @@ builder.Services.AddHttpContextAccessor();
 
 // Application + Infrastructure
 builder.Services.AddApplication();
+builder.Services.AddScoped<IRealtimeService, RealtimeService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers()
@@ -76,6 +82,10 @@ builder.Services.AddSwaggerGen(c =>
 // SignalR
 builder.Services.AddSignalR();
 
+builder.Services.AddSingleton<ISignalRUserIdProvider, SignalRUserIdProviderImpl>();
+
+builder.Services.AddSingleton<IUserIdProvider, SignalRUserIdProvider>();
+
 // JWT
 var jwtConfig = builder.Configuration.GetSection("Jwt");
 var signingKey = jwtConfig["SigningKey"];
@@ -116,10 +126,7 @@ builder.Services.
                 var accessToken = context.Request.Query["access_token"];
                 var path = context.HttpContext.Request.Path;
 
-                if (!string.IsNullOrEmpty(accessToken) &&
-                    (path.StartsWithSegments("/hubs/board") ||
-                     path.StartsWithSegments("/hubs/workSpace") ||
-                     path.StartsWithSegments("/hubs/user")))
+                if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs/user")))
                 {
                     context.Token = accessToken;
                 }
@@ -156,6 +163,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseRouting();
+
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
@@ -163,9 +172,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// SignalR hubs
-//app.MapHub<BoardHub>("/hubs/board");
-//app.MapHub<WorkspaceHub>("/hubs/workSpace");
-//app.MapHub<UserHub>("/hubs/user");
+//SignalR hubs
+app.MapHub<NotificationHub>("/hubs/user");
 
 app.Run();

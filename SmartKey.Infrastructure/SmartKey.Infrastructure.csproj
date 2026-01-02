@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SmartKey.Application\SmartKey.Application.csproj" />
     <ProjectReference Include="..\SmartKey.Domain\SmartKey.Domain.csproj" />
+    <ProjectReference Include="..\SmartKey.Presentation.SignalR\SmartKey.Presentation.SignalR.csproj" />
   </ItemGroup>
 
 </Project>

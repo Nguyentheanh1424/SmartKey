@@ -13,6 +13,8 @@ namespace SmartKey.Infrastructure.MQTT
         public string? Password { get; set; }
 
         public bool UseTls { get; set; }
+
+        public int RetrySeconds { get; set; } = 5;
     }
 
     public interface IMqttClientOptionsFactory

@@ -80,10 +80,34 @@ namespace SmartKey.API.Controllers
             var result = await _mediator.Send(new DeleteDoorCommand(doorId));
             return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
+
+        [HttpPut("{doorId:guid}/doorcode")]
+        [SwaggerOperation(
+            Summary = "Đổi door code",
+            Description = "Owner đổi mã mở cửa (door code)."
+        )]
+        public async Task<IActionResult> UpdateDoorCode(
+            Guid doorId,
+            [FromBody] UpdateDoorCodeRequest body)
+        {
+            var command = new UpdateDoorCodeCommand(
+                DoorId: doorId,
+                DoorCode: body.DoorCode
+            );
+
+            var result = await _mediator.Send(command);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
+        }
+
     }
 
     public class UpdateDoorNameRequest
     {
         public required string Name { get; init; }
+    }
+
+    public class UpdateDoorCodeRequest
+    {
+        public required string DoorCode { get; init; }
     }
 }

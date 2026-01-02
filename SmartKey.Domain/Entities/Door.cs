@@ -53,5 +53,10 @@ namespace SmartKey.Domain.Entities
             State = state;
             LastSyncAt = DateTime.UtcNow;
         }
+
+        public void UpdateDoorCode(string doorCode)
+        {
+            DoorCode = doorCode;
+        }
     }
 }

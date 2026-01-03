@@ -76,9 +76,6 @@ namespace SmartKey.Application.Features.MQTTFeatures
                 type = newState.method,
                 message = "Door state had changed!"
             };
-
-            await _realtimeService.SendNotiToUserAsync(door.OwnerId, MethodType.Notification, data);
-
         }
 
         private (DoorState state, string method) MapDoorState(string state)

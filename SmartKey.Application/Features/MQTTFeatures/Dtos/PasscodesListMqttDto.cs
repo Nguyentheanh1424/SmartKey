@@ -16,13 +16,14 @@ namespace SmartKey.Application.Features.MQTTFeatures.Dtos
         [JsonProperty("code")]
         public string Code { get; set; } = string.Empty;
 
+        // master | one_time | timed
         [JsonProperty("type")]
-        public string Type { get; set; } = string.Empty; // "permanent" | "one_time" | "timed"
+        public string Type { get; set; } = string.Empty;
 
-        [JsonProperty("validFrom")]
-        public long? ValidFrom { get; set; }
+        [JsonProperty("effectiveAt")]
+        public long? EffectiveAt { get; set; }
 
-        [JsonProperty("validTo")]
-        public long? ValidTo { get; set; }
+        [JsonProperty("expireAt")]
+        public long? ExpireAt { get; set; }
     }
 }

@@ -44,10 +44,10 @@ namespace SmartKey.Infrastructure.MQTT
                 "log" => scope.ServiceProvider
                     .GetService<DoorLogMessageHandler>(),
 
-                "passcodes" => scope.ServiceProvider
+                "passcodeslist" => scope.ServiceProvider
                     .GetService<DoorPasscodesListHandler>(),
 
-                "iccards" => scope.ServiceProvider
+                "iccardslist" => scope.ServiceProvider
                     .GetService<DoorICCardsListHandler>(),
 
                 _ => null

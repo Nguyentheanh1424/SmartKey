@@ -44,7 +44,6 @@ namespace SmartKey.API.Controllers
                 DoorId: doorId,
                 Code: body.Code,
                 Type: body.Type,
-                ValidFrom: body.ValidFrom,
                 ValidTo: body.ValidTo
             );
 
@@ -85,7 +84,8 @@ namespace SmartKey.API.Controllers
         {
             var command = new DeletePasscodeCommand(
                 DoorId: doorId,
-                Code: body.Code
+                Code: body.Code,
+                Type: body.Type
             );
 
             var result = await _mediator.Send(command);
@@ -123,5 +123,6 @@ namespace SmartKey.API.Controllers
     public class DeletePasscodeRequest
     {
         public string Code { get; init; } = string.Empty;
+        public PasscodeType Type { get; init; }
     }
 }

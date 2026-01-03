@@ -1,6 +1,8 @@
 ﻿using MediatR;
+using SmartKey.Application.Common.Exceptions;
 using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
+using SmartKey.Domain.Common;
 using SmartKey.Domain.Entities;
 using SmartKey.Domain.Enums;
 
@@ -10,12 +12,11 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
         Guid DoorId,
         string Code,
         PasscodeType Type,
-        DateTime? ValidFrom,
         DateTime? ValidTo
-    ) : IRequest<bool>;
+    ) : IRequest<Result>;
 
     public class AddPasscodeCommandHandler
-        : IRequestHandler<AddPasscodeCommand, bool>
+        : IRequestHandler<AddPasscodeCommand, Result>
     {
         private readonly IUnitOfWork _uow;
         private readonly IDoorMqttService _mqtt;
@@ -28,28 +29,83 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
             _mqtt = mqtt;
         }
 
-        public async Task<bool> Handle(
+        public async Task<Result> Handle(
             AddPasscodeCommand request,
             CancellationToken ct)
         {
             var doorRepo = _uow.GetRepository<Door, Guid>();
-            var door = await doorRepo.GetByIdAsync(request.DoorId);
+            var passcodeRepo = _uow.GetRepository<Passcode, Guid>();
 
-            if (door == null)
-                throw new Exception("Door not found");
+            var door = await doorRepo.GetByIdAsync(request.DoorId)
+                ?? throw new NotFoundException("Door not found");
 
-            var payload = new
+            if (string.IsNullOrWhiteSpace(request.Code))
+                throw new BusinessException("Passcode is required");
+
+            var existing = await passcodeRepo.FindAsync(p =>
+                p.DoorId == request.DoorId &&
+                p.Code == request.Code &&
+                p.Type == request.Type
+            );
+
+            if (request.Type == PasscodeType.Timed)
             {
-                action = "add",
-                code = request.Code,
-                type = request.Type switch
+                if (existing.Any())
+                    throw new BusinessException("Passcode already exists");
+            }
+
+            if (request.Type == PasscodeType.OneTime)
+            {
+                if (existing.Any(p => p.IsActive))
+                    throw new BusinessException("Active one-time passcode already exists");
+            }
+
+            var now = DateTimeOffset.UtcNow;
+            var effectiveAtTs = now.ToUnixTimeSeconds();
+
+            long expireAtTs = 0;
+
+            if (request.ValidTo != null)
+            {
+                var validToUtc = DateTime.SpecifyKind(
+                    request.ValidTo.Value,
+                    DateTimeKind.Utc
+                );
+
+                expireAtTs = new DateTimeOffset(validToUtc)
+                    .ToUnixTimeSeconds();
+
+                if (expireAtTs <= effectiveAtTs)
+                    throw new BusinessException("ValidTo must be greater than now");
+            }
+
+            var ts = effectiveAtTs;
+
+            object payload = request.Type switch
+            {
+                PasscodeType.OneTime => new
                 {
-                    PasscodeType.OneTime => "one_time",
-                    PasscodeType.Timed => "timed",
-                    _ => throw new InvalidOperationException()
+                    action = "add",
+                    type = "one_time",
+                    code = request.Code,
+                    ts,
+                    effectiveAt = effectiveAtTs,
+                    expireAt = expireAtTs
                 },
-                validFrom = request.ValidFrom,
-                validTo = request.ValidTo
+
+                PasscodeType.Timed => new
+                {
+                    action = "add",
+                    type = "timed",
+                    code = request.Code,
+                    ts,
+                    effectiveAt = effectiveAtTs,
+                    expireAt = expireAtTs
+                },
+
+                _ => throw new BusinessException(
+                    $"Unsupported passcode type: {request.Type}"
+                )
             };
 
             await _mqtt.PublishPasscodesCommandAsync(
@@ -58,7 +114,7 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
                 ct
             );
 
-            return true;
+            return Result.Success("Gửi yêu cầu thành công");
         }
     }
 }

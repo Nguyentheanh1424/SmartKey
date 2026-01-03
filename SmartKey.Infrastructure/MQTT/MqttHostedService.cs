@@ -41,8 +41,8 @@ namespace SmartKey.Infrastructure.MQTT
             await _client.SubscribeAsync("+/state");
             await _client.SubscribeAsync("+/log");
             await _client.SubscribeAsync("+/battery");
-            await _client.SubscribeAsync("+/passcodes");
-            await _client.SubscribeAsync("+/iccards");
+            await _client.SubscribeAsync("+/passcodeslist");
+            await _client.SubscribeAsync("+/iccardslist");
         }
 
         private async Task ConnectWithRetryAsync(CancellationToken cancellationToken)

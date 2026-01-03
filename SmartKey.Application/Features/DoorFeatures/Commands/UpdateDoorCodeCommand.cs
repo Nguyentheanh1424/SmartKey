@@ -2,6 +2,7 @@
 using MediatR;
 using SmartKey.Application.Common.Exceptions;
 using SmartKey.Application.Common.Interfaces.Auth;
+using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
 using SmartKey.Domain.Common;
 using SmartKey.Domain.Entities;
@@ -34,40 +35,50 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
     }
 
     public class UpdateDoorCodeCommandHandler
-        : IRequestHandler<UpdateDoorCodeCommand, Result>
+    : IRequestHandler<UpdateDoorCodeCommand, Result>
     {
         private readonly IRepository<Door, Guid> _doorRepository;
         private readonly ICurrentUserService _currentUser;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IDoorMqttService _mqtt;
 
         public UpdateDoorCodeCommandHandler(
             ICurrentUserService currentUser,
-            IUnitOfWork unitOfWork)
+            IUnitOfWork unitOfWork,
+            IDoorMqttService mqtt)
         {
             _doorRepository = unitOfWork.GetRepository<Door, Guid>();
             _currentUser = currentUser;
-            _unitOfWork = unitOfWork;
+            _mqtt = mqtt;
         }
 
         public async Task<Result> Handle(
             UpdateDoorCodeCommand request,
-            CancellationToken cancellationToken)
+            CancellationToken ct)
         {
             var userId = _currentUser.UserId
                 ?? throw new UnauthorizedException();
 
-            var door = await _doorRepository
-                .GetByIdAsync(request.DoorId)
+            var door = await _doorRepository.GetByIdAsync(request.DoorId)
                 ?? throw new NotFoundException("Door không tồn tại.");
 
             if (door.OwnerId != userId)
                 throw new ForbiddenAccessException("Bạn không có quyền đổi mã cửa.");
 
-            door.UpdateDoorCode(request.DoorCode.Trim());
+            var payload = new
+            {
+                action = "add",
+                type = "master",
+                code = request.DoorCode
+            };
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await _mqtt.PublishPasscodesCommandAsync(
+                door.MqttTopicPrefix,
+                payload,
+                ct
+            );
 
             return Result.Success();
         }
     }
+
 }

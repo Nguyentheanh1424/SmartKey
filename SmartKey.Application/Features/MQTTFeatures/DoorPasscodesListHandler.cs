@@ -22,7 +22,6 @@ namespace SmartKey.Application.Features.MQTTFeatures
             string payload,
             CancellationToken ct)
         {
-            // Deserialize payload
             PasscodesListMqttDto dto;
             try
             {
@@ -33,21 +32,45 @@ namespace SmartKey.Application.Features.MQTTFeatures
                 return;
             }
 
-            if (dto == null)
+            if (dto?.Items == null)
                 return;
 
+            var doorRepo = _uow.GetRepository<Door, Guid>();
             var passcodeRepo = _uow.GetRepository<Passcode, Guid>();
 
-            // Replace-all: load existing passcodes
+            var door = await doorRepo.GetByIdAsync(doorId);
+            if (door == null)
+                return;
+
             var existing = await passcodeRepo.FindAsync(p => p.DoorId == doorId);
 
-            // Delete all existing
-            foreach (var p in existing)
+            var existingOneTimes = existing
+                .Where(p => p.Type == PasscodeType.OneTime && p.IsActive)
+                .ToList();
+
+            var existingTimed = existing
+                .Where(p => p.Type == PasscodeType.Timed)
+                .ToList();
+
+            var incomingCodes = new HashSet<string>(
+                dto.Items
+                    .Where(i => i.Type == "one_time")
+                    .Select(i => i.Code)
+            );
+
+            foreach (var p in existingOneTimes)
+            {
+                if (!incomingCodes.Contains(p.Code))
+                {
+                    p.Expire(); // IsActive = false
+                }
+            }
+
+            foreach (var p in existingTimed)
             {
                 await passcodeRepo.DeleteAsync(p);
             }
 
-            // Insert passcodes from device
             foreach (var item in dto.Items)
             {
                 if (string.IsNullOrWhiteSpace(item.Code))
@@ -56,19 +79,28 @@ namespace SmartKey.Application.Features.MQTTFeatures
                 if (!TryMapType(item.Type, out var type))
                     continue;
 
+                if (type == PasscodeType.Master)
+                {
+                    door.UpdateDoorCode(item.Code);
+                    continue;
+                }
+
+                if (type == PasscodeType.OneTime &&
+                    existingOneTimes.Any(p => p.Code == item.Code))
+                {
+                    continue;
+                }
+
                 var passcode = new Passcode(
                     doorId: doorId,
                     code: item.Code,
                     type: type
                 );
 
-                if (type == PasscodeType.Timed)
-                {
-                    passcode.SetValidity(
-                        FromUnix(item.ValidFrom),
-                        FromUnix(item.ValidTo)
-                    );
-                }
+                passcode.SetValidity(
+                    FromUnix(item.EffectiveAt),
+                    FromUnix(item.ExpireAt)
+                );
 
                 await passcodeRepo.AddAsync(passcode);
             }
@@ -76,10 +108,16 @@ namespace SmartKey.Application.Features.MQTTFeatures
             await _uow.SaveChangesAsync(ct);
         }
 
-        private static bool TryMapType(string type, out PasscodeType result)
+        private static bool TryMapType(
+            string type,
+            out PasscodeType result)
         {
             switch (type)
             {
+                case "master":
+                    result = PasscodeType.Master;
+                    return true;
+
                 case "one_time":
                     result = PasscodeType.OneTime;
                     return true;
@@ -96,7 +134,7 @@ namespace SmartKey.Application.Features.MQTTFeatures
 
         private static DateTime? FromUnix(long? seconds)
         {
-            if (!seconds.HasValue)
+            if (!seconds.HasValue || seconds.Value <= 0)
                 return null;
 
             return DateTimeOffset

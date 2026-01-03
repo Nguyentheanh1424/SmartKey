@@ -1,14 +1,15 @@
 ﻿using MediatR;
 using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
+using SmartKey.Domain.Common;
 using SmartKey.Domain.Entities;
 
 namespace SmartKey.Application.Features.PasscodeFeatures.Commands
 {
-    public record SyncPasscodesCommand(Guid DoorId) : IRequest<bool>;
+    public record SyncPasscodesCommand(Guid DoorId) : IRequest<Result>;
 
     public class SyncPasscodesCommandHandler
-        : IRequestHandler<SyncPasscodesCommand, bool>
+        : IRequestHandler<SyncPasscodesCommand, Result>
     {
         private readonly IUnitOfWork _uow;
         private readonly IDoorMqttService _mqtt;
@@ -21,7 +22,7 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
             _mqtt = mqtt;
         }
 
-        public async Task<bool> Handle(
+        public async Task<Result> Handle(
             SyncPasscodesCommand request,
             CancellationToken ct)
         {
@@ -36,7 +37,7 @@ namespace SmartKey.Application.Features.PasscodeFeatures.Commands
                 ct
             );
 
-            return true;
+            return Result.Success("Gửi yêu cầu đồng bộ thành công.");
         }
     }
 }

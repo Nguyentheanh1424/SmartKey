@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Npgsql;
 using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
 using SmartKey.Application.Features.MQTTFeatures;
@@ -23,7 +24,9 @@ namespace SmartKey.Infrastructure.MQTT
             });
         }
 
-        public MqttMessageDispatcher(IServiceScopeFactory scopeFactory, ILogger<MqttMessageDispatcher> logger)
+        public MqttMessageDispatcher(
+            IServiceScopeFactory scopeFactory,
+            ILogger<MqttMessageDispatcher> logger)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -35,21 +38,11 @@ namespace SmartKey.Infrastructure.MQTT
         {
             return suffix switch
             {
-                "state" => scope.ServiceProvider
-                    .GetService<DoorStateMessageHandler>(),
-
-                "battery" => scope.ServiceProvider
-                    .GetService<DoorBatteryMessageHandler>(),
-
-                "log" => scope.ServiceProvider
-                    .GetService<DoorLogMessageHandler>(),
-
-                "passcodeslist" => scope.ServiceProvider
-                    .GetService<DoorPasscodesListHandler>(),
-
-                "iccardslist" => scope.ServiceProvider
-                    .GetService<DoorICCardsListHandler>(),
-
+                "state" => scope.ServiceProvider.GetService<DoorStateMessageHandler>(),
+                "battery" => scope.ServiceProvider.GetService<DoorBatteryMessageHandler>(),
+                "log" => scope.ServiceProvider.GetService<DoorLogMessageHandler>(),
+                "passcodeslist" => scope.ServiceProvider.GetService<DoorPasscodesListHandler>(),
+                "iccardslist" => scope.ServiceProvider.GetService<DoorICCardsListHandler>(),
                 _ => null
             };
         }
@@ -60,10 +53,9 @@ namespace SmartKey.Infrastructure.MQTT
             CancellationToken ct)
         {
             _logger.LogInformation(
-                "MQTT message received.Topic: {Topic} Payload: {Payload}",
+                "MQTT message received. Topic={Topic} Payload={Payload}",
                 topic,
                 PrettyJson(payload));
-
 
             using var scope = _scopeFactory.CreateScope();
             var uow = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
@@ -72,15 +64,12 @@ namespace SmartKey.Infrastructure.MQTT
 
             var fingerprint = MqttFingerprint.Create(topic, payload);
 
-            var exists = await inboxRepo.AnyAsync(
-                m => m.Fingerprint == fingerprint);
-
-            if (exists)
-                return;
-
             var parts = topic.Split('/');
             if (parts.Length != 2)
+            {
+                _logger.LogWarning("Invalid MQTT topic format: {Topic}", topic);
                 return;
+            }
 
             var mqttPrefix = parts[0];
             var suffix = parts[1];
@@ -95,7 +84,18 @@ namespace SmartKey.Infrastructure.MQTT
                 fingerprint,
                 door?.Id);
 
-            await inboxRepo.AddAsync(inbox);
+            try
+            {
+                await inboxRepo.AddAsync(inbox);
+                await uow.SaveChangesAsync(ct);
+            }
+            catch (PostgresException ex) when (ex.SqlState == "23505")
+            {
+                _logger.LogInformation(
+                    "Duplicate MQTT message ignored (fingerprint). Topic={Topic}",
+                    topic);
+                return;
+            }
 
             if (door != null)
             {

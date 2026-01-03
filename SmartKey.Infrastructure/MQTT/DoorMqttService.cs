@@ -42,12 +42,13 @@ namespace SmartKey.Infrastructure.MQTT
         {
             await RequestPasscodesAsync(topicPrefix, ct);
             await RequestICCardsAsync(topicPrefix, ct);
+            await RequestBatteryAsync(topicPrefix, ct);
         }
 
         public Task RequestPasscodesAsync(string topicPrefix, CancellationToken ct = default)
             => _publisher.PublishAsync(
                 topic: $"{topicPrefix}/passcodes/request",
-                payload: string.Empty,
+                payload: "{}",
                 qos: QoS,
                 retain: false,
                 ct: ct);
@@ -55,7 +56,15 @@ namespace SmartKey.Infrastructure.MQTT
         public Task RequestICCardsAsync(string topicPrefix, CancellationToken ct = default)
             => _publisher.PublishAsync(
                 topic: $"{topicPrefix}/iccards/request",
-                payload: string.Empty,
+                payload: "{}",
+                qos: QoS,
+                retain: false,
+                ct: ct);
+
+        public Task RequestBatteryAsync(string topicPrefix, CancellationToken ct = default)
+            => _publisher.PublishAsync(
+                topic: $"{topicPrefix}/battery/request",
+                payload: "{}",
                 qos: QoS,
                 retain: false,
                 ct: ct);
@@ -89,5 +98,6 @@ namespace SmartKey.Infrastructure.MQTT
                 retain: false,
                 ct: ct);
         }
+
     }
 }

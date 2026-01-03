@@ -42,7 +42,7 @@ namespace SmartKey.Application.Features.DoorFeatures.Queries
             var door = await doorRepo.GetByIdAsync(request.DoorId)
                 ?? throw new NotFoundException("Door không tồn tại.");
 
-            var dto = _mapper.Map<DoorDetailDto>(door);
+            var dto = _mapper.Map<DoorDetailDto >(door);
 
             if (door.OwnerId == userId)
             {

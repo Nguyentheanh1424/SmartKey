@@ -8,6 +8,7 @@
         Task SyncAllAsync(string topicPrefix, CancellationToken ct = default);
         Task RequestPasscodesAsync(string topicPrefix, CancellationToken ct = default);
         Task RequestICCardsAsync(string topicPrefix, CancellationToken ct = default);
+        Task RequestBatteryAsync(string topicPrefix, CancellationToken ct = default);
 
         Task PublishPasscodesCommandAsync(string topicPrefix, object payload, CancellationToken ct = default);
 

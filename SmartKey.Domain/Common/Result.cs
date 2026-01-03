@@ -3,12 +3,12 @@
     public class Result
     {
         public bool IsSuccess { get; }
-        public string? ErrorMessage { get; }
+        public string? Message { get; }
 
         private Result(bool isSuccess, string? error)
         {
             IsSuccess = isSuccess;
-            ErrorMessage = error;
+            Message = error;
         }
 
         public static Result Success() => new(true, null);

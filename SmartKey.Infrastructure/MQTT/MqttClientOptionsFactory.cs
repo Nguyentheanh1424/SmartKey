@@ -26,7 +26,8 @@ namespace SmartKey.Infrastructure.MQTT
     {
         private readonly MqttOptions _options;
 
-        public MqttClientOptionsFactory(IOptions<MqttOptions> options)
+        public 
+            MqttClientOptionsFactory(IOptions<MqttOptions> options)
         {
             _options = options.Value;
         }

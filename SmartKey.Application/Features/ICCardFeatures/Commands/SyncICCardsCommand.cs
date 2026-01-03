@@ -1,16 +1,17 @@
 ﻿using MediatR;
 using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
+using SmartKey.Domain.Common;
 using SmartKey.Domain.Entities;
 
 namespace SmartKey.Application.Features.ICCardFeatures.Commands
 {
     public record SyncICCardsCommand(
         Guid DoorId
-    ) : IRequest<bool>;
+    ) : IRequest<Result>;
 
     public class SyncICCardsCommandHandler
-        : IRequestHandler<SyncICCardsCommand, bool>
+        : IRequestHandler<SyncICCardsCommand, Result>
     {
         private readonly IUnitOfWork _uow;
         private readonly IDoorMqttService _mqtt;
@@ -23,7 +24,7 @@ namespace SmartKey.Application.Features.ICCardFeatures.Commands
             _mqtt = mqtt;
         }
 
-        public async Task<bool> Handle(
+        public async Task<Result> Handle(
             SyncICCardsCommand request,
             CancellationToken ct)
         {
@@ -38,7 +39,7 @@ namespace SmartKey.Application.Features.ICCardFeatures.Commands
                 ct
             );
 
-            return true;
+            return Result.Success("Gửi yêu cầu đồng bộ thành công.");
         }
     }
 }

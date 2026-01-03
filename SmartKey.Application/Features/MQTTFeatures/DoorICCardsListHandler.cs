@@ -36,16 +36,13 @@ namespace SmartKey.Application.Features.MQTTFeatures
 
             var icCardRepo = _uow.GetRepository<ICCard, Guid>();
 
-            // Replace-all: load existing ICCards
             var existing = await icCardRepo.FindAsync(c => c.DoorId == doorId);
 
-            // Delete all existing
             foreach (var card in existing)
             {
                 await icCardRepo.DeleteAsync(card);
             }
 
-            // Insert cards from device
             foreach (var item in dto.Items)
             {
                 if (string.IsNullOrWhiteSpace(item.Uid))

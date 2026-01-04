@@ -1,19 +1,24 @@
 ﻿using Newtonsoft.Json;
+using SmartKey.Application.Common.Events;
 using SmartKey.Application.Common.Interfaces.MQTT;
 using SmartKey.Application.Common.Interfaces.Repositories;
+using SmartKey.Application.Common.Interfaces.Services;
 using SmartKey.Application.Features.MQTTFeatures.Dtos;
 using SmartKey.Domain.Entities;
 using SmartKey.Domain.Enums;
+using static SmartKey.Application.Features.MQTTFeatures.DoorLogMessageHandler;
 
 namespace SmartKey.Application.Features.MQTTFeatures
 {
     public class DoorPasscodesListHandler : IMqttMessageHandler
     {
         private readonly IUnitOfWork _uow;
+        public readonly IRealtimeService _realtimeService;
 
-        public DoorPasscodesListHandler(IUnitOfWork uow)
+        public DoorPasscodesListHandler(IUnitOfWork uow, IRealtimeService realtimeService)
         {
             _uow = uow;
+            _realtimeService = realtimeService;
         }
 
         public async Task HandleAsync(
@@ -37,6 +42,7 @@ namespace SmartKey.Application.Features.MQTTFeatures
 
             var doorRepo = _uow.GetRepository<Door, Guid>();
             var passcodeRepo = _uow.GetRepository<Passcode, Guid>();
+            var recordRepo = _uow.GetRepository<DoorRecord, Guid>();
 
             var door = await doorRepo.GetByIdAsync(doorId);
             if (door == null)
@@ -105,7 +111,21 @@ namespace SmartKey.Application.Features.MQTTFeatures
                 await passcodeRepo.AddAsync(passcode);
             }
 
+            var record = new DoorRecord(
+                doorId,
+                @event: "PasscodeListUpdated",
+                method: "Device",
+                rawPayload: payload
+            );
+
+            await recordRepo.AddAsync(record);
+
             await _uow.SaveChangesAsync(ct);
+
+            DoorNotiDetail? notiDetail = new DoorNotiDetail(doorId, door.Name, "PasscodeListUpdated", "Device");
+            notiDetail.Message = "Danh sách Passcode đã được cập nhật.";
+
+            await _realtimeService.SendNotiToUserAsync(door.OwnerId, MethodType.Notification, notiDetail);
         }
 
         private static bool TryMapType(

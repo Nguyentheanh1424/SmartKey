@@ -80,7 +80,7 @@ namespace SmartKey.Application.Features.MQTTFeatures
             DoorNotiDetail? notiDetail = new DoorNotiDetail(doorId, door.Name, "CardListUpdated", "Device");
             notiDetail.Message = "Danh sách Card đã được cập nhật.";
 
-            await _realtimeService.SendNotiToUserAsync(door.OwnerId, MethodType.Notification, notiDetail);
+            //await _realtimeService.SendNotiToUserAsync(door.OwnerId, MethodType.Notification, notiDetail);
         }
     }
 }

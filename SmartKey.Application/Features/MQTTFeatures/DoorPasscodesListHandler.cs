@@ -125,7 +125,7 @@ namespace SmartKey.Application.Features.MQTTFeatures
             DoorNotiDetail? notiDetail = new DoorNotiDetail(doorId, door.Name, "PasscodeListUpdated", "Device");
             notiDetail.Message = "Danh sách Passcode đã được cập nhật.";
 
-            await _realtimeService.SendNotiToUserAsync(door.OwnerId, MethodType.Notification, notiDetail);
+            //await _realtimeService.SendNotiToUserAsync(door.OwnerId, MethodType.Notification, notiDetail);
         }
 
         private static bool TryMapType(

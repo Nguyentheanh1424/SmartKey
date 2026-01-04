@@ -12,6 +12,7 @@ namespace SmartKey.Application.Features.DoorFeatures.Dtos
 
         public int Battery { get; set; }
         public DateTime LastSyncAt { get; set; }
+        public string State { get; set; } = string.Empty;
 
         public DoorPermission Permission { get; set; }
 

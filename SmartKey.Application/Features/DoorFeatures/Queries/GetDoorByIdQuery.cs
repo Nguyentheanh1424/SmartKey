@@ -4,6 +4,7 @@ using SmartKey.Application.Common.Exceptions;
 using SmartKey.Application.Common.Interfaces.Auth;
 using SmartKey.Application.Common.Interfaces.Repositories;
 using SmartKey.Application.Features.DoorFeatures.Dtos;
+using SmartKey.Domain.Common;
 using SmartKey.Domain.Entities;
 using SmartKey.Domain.Enums;
 
@@ -42,7 +43,7 @@ namespace SmartKey.Application.Features.DoorFeatures.Queries
             var door = await doorRepo.GetByIdAsync(request.DoorId)
                 ?? throw new NotFoundException("Door không tồn tại.");
 
-            var dto = _mapper.Map<DoorDetailDto >(door);
+            var dto = _mapper.Map<DoorDetailDto>(door);
 
             if (door.OwnerId == userId)
             {
@@ -68,6 +69,8 @@ namespace SmartKey.Application.Features.DoorFeatures.Queries
             dto.Permission = share.Permission;
             dto.ValidFrom = share.ValidFrom;
             dto.ValidTo = share.ValidTo;
+
+            dto.State = EnumExtensions.GetName(door.State);
 
             return dto;
         }

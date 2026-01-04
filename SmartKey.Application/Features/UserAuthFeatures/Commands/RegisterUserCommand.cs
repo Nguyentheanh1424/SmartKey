@@ -93,12 +93,14 @@ namespace SmartKey.Application.Features.UserAuthFeatures.Commands
             var otp = await _otpService.GenerateAsync(email);
             await _otpService.MarkOtpSentAsync(email);
 
-            await _emailService.SendAsync(
-                email,
-                "Xác thực tài khoản SmartKey",
-                $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>" +
-                $"<p>Mã OTP có hiệu lực trong vòng 2 phút. Vui lòng sử dụng nhanh chóng.</p>"
-            );
+            //await _emailService.SendAsync(
+            //    email,
+            //    "Xác thực tài khoản SmartKey",
+            //    $"<p>Mã OTP của bạn là: <strong>{otp}</strong></p>" +
+            //    $"<p>Mã OTP có hiệu lực trong vòng 2 phút. Vui lòng sử dụng nhanh chóng.</p>"
+            //);
+
+            Console.WriteLine($"Mã OTP là: {otp}");
 
             return Result.Success(
                 "Đăng ký thành công. Vui lòng kiểm tra email để xác thực OTP.");

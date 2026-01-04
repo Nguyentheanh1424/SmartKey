@@ -8,7 +8,6 @@ using SmartKey.Domain.Entities;
 namespace SmartKey.Application.Features.DoorFeatures.Commands
 {
     public record CreateDoorCommand(
-        string DoorCode,
         string Name,
         string MacAddress,
         string MqttTopicPrefix
@@ -38,14 +37,13 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
                 ?? throw new UnauthorizedException();
 
             var exists = await _doorRepository
-                .FirstOrDefaultAsync(x => x.DoorCode == request.DoorCode);
+                .FirstOrDefaultAsync(x => x.DoorCode == request.MqttTopicPrefix);
 
             if (exists != null)
-                throw new BusinessException("DoorCode đã tồn tại.");
+                throw new BusinessException("MqttTopicPrefix đã tồn tại.");
 
             var door = new Door(
                 ownerId,
-                request.DoorCode,
                 request.Name,
                 request.MacAddress,
                 request.MqttTopicPrefix

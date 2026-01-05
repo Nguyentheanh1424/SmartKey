@@ -5,7 +5,6 @@ using SmartKey.Application.Common.Interfaces.Repositories;
 using SmartKey.Application.Common.Interfaces.Services;
 using SmartKey.Application.Features.MQTTFeatures.Dtos;
 using SmartKey.Domain.Entities;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SmartKey.Application.Features.MQTTFeatures
 {

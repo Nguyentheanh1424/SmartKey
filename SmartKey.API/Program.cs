@@ -21,6 +21,7 @@ builder.Services.AddHttpContextAccessor();
 // Application + Infrastructure
 builder.Services.AddApplication();
 builder.Services.AddScoped<IRealtimeService, RealtimeService>();
+builder.Services.AddHostedService<CallApiBackgroundService>();
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddControllers()
@@ -80,7 +81,11 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 // SignalR
-builder.Services.AddSignalR();
+builder.Services.AddSignalR(option =>
+{
+    option.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    option.ClientTimeoutInterval = TimeSpan.FromSeconds(60);
+});
 
 builder.Services.AddSingleton<ISignalRUserIdProvider, SignalRUserIdProviderImpl>();
 

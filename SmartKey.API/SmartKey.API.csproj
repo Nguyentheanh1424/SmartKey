@@ -18,8 +18,4 @@
     <ProjectReference Include="..\SmartKey.Presentation.SignalR\SmartKey.Presentation.SignalR.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-
 </Project>

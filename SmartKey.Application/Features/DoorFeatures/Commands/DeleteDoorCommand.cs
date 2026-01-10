@@ -34,6 +34,7 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
             var shareRepo = _unitOfWork.GetRepository<DoorShare, Guid>();
             var icCardRepo = _unitOfWork.GetRepository<ICCard, Guid>();
             var passcodeRepo = _unitOfWork.GetRepository<Passcode, Guid>();
+            var recordRepo = _unitOfWork.GetRepository<DoorRecord, Guid>();
 
             var door = await doorRepo.GetByIdAsync(request.DoorId)
                 ?? throw new NotFoundException("Door không tồn tại.");
@@ -57,6 +58,12 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
             foreach (var passcode in passcodes)
             {
                 await passcodeRepo.DeleteAsync(passcode);
+            }
+
+            var doorRecords = await recordRepo.FindAsync(x => x.DoorId == door.Id);
+            foreach (var record in doorRecords)
+            {
+                await recordRepo.DeleteAsync(record);
             }
 
             await doorRepo.DeleteAsync(door);

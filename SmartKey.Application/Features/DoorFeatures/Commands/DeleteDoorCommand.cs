@@ -35,6 +35,8 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
             var icCardRepo = _unitOfWork.GetRepository<ICCard, Guid>();
             var passcodeRepo = _unitOfWork.GetRepository<Passcode, Guid>();
             var recordRepo = _unitOfWork.GetRepository<DoorRecord, Guid>();
+            var doorCommandRepo = _unitOfWork.GetRepository<DoorCommand, Guid>();
+            var mqttInboxRepo = _unitOfWork.GetRepository<MqttInboxMessage, Guid>();
 
             var door = await doorRepo.GetByIdAsync(request.DoorId)
                 ?? throw new NotFoundException("Door không tồn tại.");
@@ -42,29 +44,47 @@ namespace SmartKey.Application.Features.DoorFeatures.Commands
             if (door.OwnerId != userId)
                 throw new ForbiddenAccessException("Bạn không có quyền gỡ cửa này.");
 
-            var shares = await shareRepo.FindAsync(x => x.DoorId == door.Id);
-            foreach (var share in shares)
+            var mqttMessages = await mqttInboxRepo.FindAsync(x => x.DoorId == door.Id);
+            foreach (var msg in mqttMessages)
             {
-                await shareRepo.DeleteAsync(share);
+                await mqttInboxRepo.DeleteAsync(msg);
             }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);  
 
-            var icCards = await icCardRepo.FindAsync(x => x.DoorId == door.Id);
-            foreach (var card in icCards)
+            var doorCommands = await doorCommandRepo.FindAsync(x => x.DoorId == door.Id);
+            foreach (var cmd in doorCommands)
             {
-                await icCardRepo.DeleteAsync(card);
+                await doorCommandRepo.DeleteAsync(cmd);
             }
-
-            var passcodes = await passcodeRepo.FindAsync(x => x.DoorId == door.Id);
-            foreach (var passcode in passcodes)
-            {
-                await passcodeRepo.DeleteAsync(passcode);
-            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             var doorRecords = await recordRepo.FindAsync(x => x.DoorId == door.Id);
             foreach (var record in doorRecords)
             {
                 await recordRepo.DeleteAsync(record);
             }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var icCards = await icCardRepo.FindAsync(x => x.DoorId == door.Id);
+            foreach (var card in icCards)
+            {
+                await icCardRepo.DeleteAsync(card);
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var passcodes = await passcodeRepo.FindAsync(x => x.DoorId == door.Id);
+            foreach (var passcode in passcodes)
+            {
+                await passcodeRepo.DeleteAsync(passcode);
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            var shares = await shareRepo.FindAsync(x => x.DoorId == door.Id);
+            foreach (var share in shares)
+            {
+                await shareRepo.DeleteAsync(share);
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
 
             await doorRepo.DeleteAsync(door);
 
